@@ -112,17 +112,17 @@ no_iterations = 100
 actions = ['no action','N','E','W','S'] 
 
 
-def valueFromIndex(index_of_state): #returns the value function of the state who's index has been passed as an argument
+'''def valueFromIndex(index_of_state): #returns the value function of the state who's index has been passed as an argument
     for i in maze:
         if index_of_state == i.index:
-            return i.value 
+            return i.value''' 
 
 def valueIteration():
     
     #sigma = 0.003 
     gamma = 0.5 
     count = 0
-    while(count<=1):
+    while(count<=10000):
         for i in maze:
             reward_list = []
             for j in actions:
