@@ -1,3 +1,5 @@
+#Deterministic Maze 
+
 import random 
 
 class state:
@@ -7,8 +9,10 @@ class state:
         self.up = wall[2] 
         self.down = wall[3] 
         self.index = index
-        self.x = index / n 
+        self.x = int(index / n) 
         self.y = index % n
+        self.value = 0 #Value function for that state
+        self.best_action = '' #Stores the best action for the particular state
 
     def wallinfo(self):
         return "Wall info at index {}: left {}, right {}, up {}, down {}".format(self.index, self.left, self.right, self.up, self.down)
@@ -66,7 +70,7 @@ def getReward(current_state, action): #Returns the reward for a transition
     next_state_index = getNextState(current_state, action)
     
     if current_state.index == next_state_index:
-        if current_state.index != (n*n)-1:  #if it is not terminal state
+        if current_state.index != w:  #if it is not terminal state
             reward = -100 
             return reward
         else:
@@ -92,53 +96,56 @@ for i in range(n*n):
 
 print("")
 
-start_state = maze[0] 
-terminal_state = maze[(n*n)-1]
+w = int(input("Enter the terminal/destination state:"))
+print("")
 
+terminal_state = maze[w]
 
-'''for i in maze:
-    direction = input("Enter the action for the agent in state {}: ".format(i.index))
-    print("The destination state for the current state with index {} is: {}".format(i.index,getNextState(i,direction)))
-    print("The reward for this transition is: {}".format(getReward(i,direction)))
-    print("")'''
 
 print("Learning in progress.....")
 print("")
 
-#Learning process
+#Learning process (deterministic)
 
 no_iterations = 100
 
-actions = ['N','E','W','S','no action'] 
+actions = ['no action','N','E','W','S'] 
 
-#                               S0                ,               S1            ................  
-training_set = [] #[[[A, S', R]........(100 times)],[[A, S', R].......(100 times)],................]
 
-for i in range(n*n):
+def valueFromIndex(index_of_state): #returns the value function of the state who's index has been passed as an argument
+    for i in maze:
+        if index_of_state == i.index:
+            return i.value 
+
+def valueIteration():
     
-    temp1 = []
-    
-    for j in range(no_iterations):
-        temp2 = []
-        random_action = random.choice(actions)
-        temp2.append(random_action) #temp2[0] = action
+    #sigma = 0.003 
+    gamma = 0.5 
+    count = 0
+    while(count<=1):
+        for i in maze:
+            reward_list = []
+            for j in actions:
+                r = getReward(i,j)
+                state_next_index = getNextState(i,j)
+                v = maze[state_next_index].value
+                '''v = valueFromIndex(state_next_index) 
+                print(v)'''
+                Q = float(r) + (gamma*float(v))
+                reward_list.append(Q)  
+            Qmax = max(reward_list)
+            max_index = reward_list.index(Qmax)
 
-        next_state = getNextState(maze[i],random_action)
-        temp2.append(next_state) #temp2[1] = index of next state 
-
-        reward = getReward(maze[i],random_action)
-        temp2.append(reward) #temp2[2] = reward for this transition 
-
-        temp1.append(temp2)
-
-    training_set.append(temp1)  
-
-
-for i in range(len(training_set)):
-    print("Set for state {}".format(i))
-    print(training_set[i])
-    print("")
-
-
+            i.value = Qmax
+            i.best_action = actions[max_index]
         
+        count+=1 
+
+
+
+valueIteration()
+
+for i in maze:
+    print("State: {} , Optimal action: {}".format(i.index,i.best_action))
+     
     
