@@ -1,4 +1,6 @@
-import numpy as np
+#Deterministic Frozen Lake: Agent can do 5 actions: go N,E,W,S or take no action. Each movement action, lands the agent in the corresponding 
+#adjacent cell. Grid can have multiple puddles. The agent finds its way through the grid to the goal state. 
+
 
 class state:
     def __init__(self,puddle,index):
