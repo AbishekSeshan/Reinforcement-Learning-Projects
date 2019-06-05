@@ -13,5 +13,5 @@ P(N) = 0.8, P(S) = P(no action) = 0, P(E) = P(W) = 0.1
 	 
 The agent will find an optimal way to a terminal/goal state provided by the user. 
 
-<h2>3. Frozen Lake Problem (WIP) </h2>
-This is quite similar to the maze problem with the difference that here, some cells have to be skipped since they have holes. An agent will have to find its way through the Frozen Lake. This is also an application of deterministic model based RL. 
+<h2>3. Deterministic Frozen Lake Problem </h2>
+This is quite similar to the maze problem with the difference that here, some cells have to be skipped since they have puddles. An agent will have to find its way through the Frozen Lake. This is also an application of deterministic model based RL. 
