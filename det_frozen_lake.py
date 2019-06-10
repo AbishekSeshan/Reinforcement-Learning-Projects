@@ -81,10 +81,11 @@ def valueIteration(gamma, no_iterations, terminal_state_index):
             reward_list = []
             
             for j in range(5):
+                
                 next_state_index = getNextState(lake[i], actions[j]) 
                 reward = getReward(lake[i],actions[j],goal_state_index)
                 value = lake[next_state_index].value 
-                Q = float(reward) + (gamma*float(value))  #Bellman's packup
+                Q = float(reward) + (gamma*float(value))  #Bellman's backup
                 reward_list.append(Q) 
             
             Qmax = max(reward_list) 
