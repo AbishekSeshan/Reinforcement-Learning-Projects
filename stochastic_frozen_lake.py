@@ -86,15 +86,26 @@ def getReward(current_state, action, chance, goal_state_index):
     nextstate = getNextState(current_state, action, chance)
 
     if lake[nextstate].puddle == 1:
-        reward = 10
+        reward = -100
     
     elif nextstate == goal_state_index:
         reward = 100 
     
+    elif nextstate == current_state.index:
+        reward = -10
+
     else:
         reward = 0 
     
     return reward
+
+def rewardMatrix(goal_state_index):
+    for i in range(n*n):
+        for a in range(5): 
+            r = 0.4*getReward(lake[i],actions[a],0.3,goal_state_index) + 0.6*getReward(lake[i],actions[a],0.5,goal_state_index)
+            reward_matrix[i,a] = r 
+    
+    
 
 def transitionModel(goal_state_index):
 
@@ -121,6 +132,7 @@ def transitionModel(goal_state_index):
 def policyIteration(gamma, goal_state_index):
 
     T = transitionModel(goal_state_index) 
+    
     count = 0
 
     while(count<500):
@@ -130,12 +142,12 @@ def policyIteration(gamma, goal_state_index):
 
             for a in range(5):
                 temp = 0
-                r = 0.6*getReward(lake[s],actions[a],0.6,goal_state_index) + 0.4*getReward(lake[s],actions[a],0.4,goal_state_index)
+                
 
                 for s_ in range(n*n):
                     temp = T[s,a,s_]*value[s_]
 
-                Q = r + (gamma*temp) #Bellman's backup
+                Q = reward_matrix[s,a] + (gamma*temp) #Bellman's backup
                 reward_list.append(Q) 
 
             Qmax = max(reward_list) 
@@ -148,12 +160,14 @@ def policyIteration(gamma, goal_state_index):
 
 def start():
     
+    print("")
     print("Learning in progress...")
     print("")
+    rewardMatrix(w)
     policyIteration(gamma,w) 
 
     for i in lake:
-        print("State: {} , Optimal action: {}, value: {}".format(i.index,i.best_policy,value[i.index]))
+        print("State: {} , Optimal action: {}".format(i.index,i.best_policy))
 
                 
 
@@ -177,3 +191,4 @@ if __name__ == "__main__":
     gamma = float(input("Enter the value of gamma: "))
 
     start()
+     
