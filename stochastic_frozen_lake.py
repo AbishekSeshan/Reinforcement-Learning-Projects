@@ -103,8 +103,7 @@ def rewardMatrix(goal_state_index):
     for i in range(n*n):
         for a in range(5): 
             r = 0.4*getReward(lake[i],actions[a],0.3,goal_state_index) + 0.6*getReward(lake[i],actions[a],0.5,goal_state_index)
-            reward_matrix[i,a] = r 
-    
+            reward_matrix[i,a] = r    
     
 
 def transitionModel(goal_state_index):
@@ -135,7 +134,7 @@ def policyIteration(gamma, goal_state_index):
     
     count = 0
 
-    while(count<500):
+    while(count<5000):
 
         for s in range(n*n):
             reward_list = []
@@ -143,9 +142,8 @@ def policyIteration(gamma, goal_state_index):
             for a in range(5):
                 temp = 0
                 
-
                 for s_ in range(n*n):
-                    temp = T[s,a,s_]*value[s_]
+                    temp += T[s,a,s_]*value[s_]
 
                 Q = reward_matrix[s,a] + (gamma*temp) #Bellman's backup
                 reward_list.append(Q) 
@@ -155,7 +153,7 @@ def policyIteration(gamma, goal_state_index):
 
             lake[s].best_policy = actions[reward_list.index(Qmax)] #actions[index of Qmax] 
             
-            count +=1
+            count+=1
 
 
 def start():
@@ -167,7 +165,7 @@ def start():
     policyIteration(gamma,w) 
 
     for i in lake:
-        print("State: {} , Optimal action: {}".format(i.index,i.best_policy))
+        print("State: {} , Optimal action: {} , Value: {}".format(i.index,i.best_policy,value[i.index]))
 
                 
 
@@ -191,4 +189,5 @@ if __name__ == "__main__":
     gamma = float(input("Enter the value of gamma: "))
 
     start()
-     
+
+    
