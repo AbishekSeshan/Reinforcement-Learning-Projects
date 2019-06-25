@@ -73,7 +73,7 @@ def getNextState(current_state, action): #index,passloc,desloc
 
     elif action == 4: #pickup 
         
-        if grid[current_state[0]].color == grid[pass_loc].color and current_state[1] != 4:   #if current location is pickup location and passenger not in taxi
+        if grid[current_state[0]].color == current_state[1] and current_state[1] != 4:   #if current location is pickup location and passenger not in taxi
             next_state[1] = 4                                                                #passenger in taxi.
         
         else:
@@ -81,8 +81,9 @@ def getNextState(current_state, action): #index,passloc,desloc
 
     elif action == 5: #drop
         
-        if grid[current_state[0]].color == grid[pass_loc].color and current_state[1] == 4:   #if current location is drop location and passenger is in taxi
+        if grid[current_state[0]].color < 4 and current_state[1] == 4 and grid[current_state[0]].color == current_state[2]:                   #if current location is drop location and passenger is in taxi
             next_state[1] = grid[current_state[0]].color                                     #passenger dropped off.
+            next_state[2] = next_state[1]
 
         else:
             next_state = next_state
@@ -95,24 +96,24 @@ def getReward(current_state, action):
         -1 reward otherwise'''
     
     if action == 4: #pickup
-        if grid[current_state[0]].color == grid[pass_loc].color and current_state[1] != 4:
-            reward = 20
+        if grid[current_state[0]].color == current_state[1] and current_state[1] != 4:
+            reward = 20.0
         else:
-            reward = -10
+            reward = -10.0
     
     elif action == 5: #drop off
-        if grid[current_state[0]].color == grid[pass_loc].color and current_state[1] == 4:
-            reward = 20
+        if grid[current_state[0]].color == current_state[2] and current_state[1] == 4:
+            reward = 20.0
         else:
-            reward = -10
+            reward = -10.0
 
     else:
-        reward = -1
+        reward = -1.0
     
     return reward
 
 
-def fillreward():
+'''def fillreward():
     for index in range(n*n):
         for ploc in range(5):
             for dest in range(4):
@@ -120,7 +121,9 @@ def fillreward():
                 for a in range(6):
                     r = getReward(statez,a) 
                     reward_mat[index,ploc,dest,a] = r
-
+                    if reward_mat[index,ploc,dest,a] == -10:
+                        print(index,ploc,dest,a)'''
+    
 
 def valueIteration():
 
@@ -131,31 +134,53 @@ def valueIteration():
         for index in range(n*n):
             for ploc in range(5):
                 for dest in range(4):
-                    statez = [index,ploc,dest]
-                    reward_list = []
+                    d1 = index
+                    d2 = ploc
+                    d3 = dest
+                    
+                    Qmax = -10000.0
+                    best_policy = 0
+
                     for a in range(6):
-                        next_state = getNextState(statez,a) 
+                        next_state = getNextState([d1,d2,d3],a)
                         ah = next_state[0]
                         b = next_state[1]
                         c = next_state[2]
-                        q = reward_mat[index,ploc,dest] + float(gamma*value[ah,b,c]) 
-                        reward_list.append(q) 
+                        q = getReward([d1,d2,d3],a) + gamma*(float(value[ah,b,c]))
+                        if q > Qmax:
+                            Qmax = q
+                            best_policy = a
 
-                    Qmax = max(reward_list)
-                    best = reward_list.index(Qmax) 
+                    #print(Qmax,best_policy)    
+                    #Qmax = max(reward_list)
+                    #best = reward_list.index(Qmax) 
                     
                     value[index,ploc,dest] = Qmax
-                    policy[index,ploc,dest] = best
+                    policy[index,ploc,dest] = best_policy
         count += 1
 
-    
 
 def sequence():
-    pass
-    
+    valueIteration()
+    index = taxi_loc
+    ploc = grid[pass_loc].color
+    dest = grid[destination].color
+    ac = policy[index,ploc,dest]
+    sp = getNextState([index,ploc,dest],ac)
+
+    while(sp != [destination,grid[destination].color,grid[destination].color]):
+        print("State: ",[index,ploc,dest],"----------->","Policy: ",ac)
+        index = sp[0]
+        ploc = sp[1]
+        dest = sp[2]
+        ac = policy[index,ploc,dest]
+        sp = getNextState([index,ploc,dest],ac)
+
+    print("Destination: ",[index,ploc,dest],"---------->","Policy: ",ac)
+
 def start():
 
-    pass
+    sequence() 
 
 
     
@@ -171,14 +196,11 @@ if __name__ == "__main__":
         a = '0000'
         grid.append(cell(a,i)) 
 
-    #taxi_loc = int(input("Enter taxi location: "))
-    taxi_loc = 5
+    taxi_loc = int(input("Enter taxi location: "))
 
-    #pass_loc = int(input("Enter passenger location: "))
-    pass_loc = 9 #(B)
+    pass_loc = int(input("Enter passenger location(7, 9, 20 or 24): "))
 
-    #destination = int(input("Enter destination index: "))
-    destination = 20 #(R)
+    destination = int(input("Enter destination index(7, 9, 20 or 24): "))
 
 
     #color initializations:
@@ -206,6 +228,5 @@ if __name__ == "__main__":
     grid[11].right=1
     grid[16].left=1
 
-    valueIteration()
-
-    print(policy)
+    start()
+    
